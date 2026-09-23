@@ -32,6 +32,27 @@ Flujo típico: `Lead → Dev → Reviewer + QA`. Architect y DevOps entran cuand
 
 Cada rol ve **solo sus skills**: el de desarrollo no ve la de deploy, y viceversa.
 
+## Entorno vs proyecto
+
+Gremio instala su infraestructura en el repo, y el equipo **no la toca**:
+
+```
+mi-repo/
+├── .opencode/       # entorno: agentes, skills, plugin — no se edita
+├── AGENTS.md        # entorno: bloque Gremio — no se edita
+├── opencode.json    # entorno: MCPs y permisos — solo para encender/apagar
+├── board/           # tablero del Gremio (tickets), no código
+└── app/             # tu proyecto: el árbol de la aplicación
+```
+
+- El equipo trabaja **solo** en el árbol de tu proyecto.
+- `.opencode/`, `opencode.json` y `AGENTS.md` **nunca se editan** como parte de un ticket de producto.
+- `board/` es el tablero del equipo, no código del proyecto.
+- Única excepción: **encender/apagar un MCP** en `opencode.json` (DevOps, a pedido tuyo).
+- Si resolver el producto pareciera requerir tocar el entorno, el equipo **lo escala en vez de hacerlo**.
+
+La detección de web app, tests y CI mira la raíz **y** las carpetas comunes de la app (`app/`, `src/`, `web/`, `frontend/`, `client/`, `site/`).
+
 ## Git: requisito para trabajar
 
 Gremio trabaja **con git** (historial, ramas, PRs, rollback). El Lead **puede conversar y planificar siempre**, pero **no abre tickets de trabajo si el proyecto no es un repo git**. Si no lo es, te guía con dos opciones:

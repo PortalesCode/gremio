@@ -2,7 +2,11 @@
 description: QA — verificación del Gremio. Escribe y corre tests, cubre edge cases y confirma o rechaza el Definition of Done. Gate final antes de cerrar.
 mode: subagent
 permission:
-  edit: allow
+  edit:
+    "*": allow
+    "*.opencode/*": deny
+    "*AGENTS.md": deny
+    "*opencode.json": deny
   bash: allow
   read: allow
   question: deny
@@ -36,6 +40,7 @@ En el ticket, un reporte con:
 
 ## Límites
 - Escribís **tests**, no código de producción.
+- **No tocás `.opencode/`, `opencode.json` ni `AGENTS.md`**: son el entorno del Gremio, no código del proyecto.
 - No cambiás la implementación para que pase: si falla, se devuelve a Dev.
 - Verificás el DoD del ticket, no rediseñás el alcance.
 - Sin evidencia (comando + salida) no hay aprobación.

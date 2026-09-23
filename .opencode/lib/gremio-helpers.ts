@@ -47,6 +47,9 @@ export const MARCADORES_WEB = [
   "pages/index.tsx",
 ];
 
+/** Carpetas comunes donde puede vivir la app dentro del repo (hermana a `.opencode/`). */
+export const SUBDIRS_APP = ["app", "src", "web", "frontend", "client", "site"];
+
 export const PATRONES_TEST = [
   /^test_.*\.py$/,
   /.*_test\.py$/,
@@ -108,12 +111,20 @@ export function tieneCommits(gitDir: string, rama: string | null): boolean {
   }
 }
 
+/** Prefijo legible de una base respecto de la raíz ("" para la raíz misma). */
+function etiqueta(raiz: string, base: string): string {
+  return base === raiz ? "" : `${base.slice(raiz.length + 1)}/`;
+}
+
 export function detectarWeb(raiz: string): { es: boolean; stack: string[]; senales: string[] } {
   const stack: string[] = [];
   const senales: string[] = [];
-  try {
-    const pkg = join(raiz, "package.json");
-    if (existsSync(pkg)) {
+  const bases = [raiz, ...SUBDIRS_APP.map((d) => join(raiz, d))];
+
+  for (const base of bases) {
+    const pkg = join(base, "package.json");
+    if (!existsSync(pkg)) continue;
+    try {
       const j = JSON.parse(readFileSync(pkg, "utf-8"));
       const deps = Object.keys({
         ...(j.dependencies ?? {}),
@@ -123,16 +134,20 @@ export function detectarWeb(raiz: string): { es: boolean; stack: string[]; senal
         const hit = deps.find((d) => coincideMarca(d, marca));
         if (hit && !stack.includes(marca)) {
           stack.push(marca);
-          senales.push(`package.json: ${hit}`);
+          senales.push(`${etiqueta(raiz, base)}package.json: ${hit}`);
         }
       }
+    } catch {
+      /* package.json ausente o inválido */
     }
-  } catch {
-    /* package.json ausente o inválido */
   }
-  for (const p of MARCADORES_WEB) {
-    if (existsSync(join(raiz, p))) senales.push(p);
+
+  for (const base of bases) {
+    for (const p of MARCADORES_WEB) {
+      if (existsSync(join(base, p))) senales.push(`${etiqueta(raiz, base)}${p}`);
+    }
   }
+
   return { es: stack.length > 0 || senales.length > 0, stack, senales };
 }
 
@@ -154,13 +169,16 @@ export function leerHerramientas(raiz: string): Record<string, boolean> | null {
 }
 
 export function tieneTests(raiz: string): boolean {
+  const bases = [raiz, ...SUBDIRS_APP.map((d) => join(raiz, d))];
   const dirs = ["tests", "test", "spec", "__tests__", "src/tests", "src/__tests__"];
-  if (dirs.some((d) => existsSync(join(raiz, d)))) return true;
-  try {
-    return readdirSync(raiz).some((f) => PATRONES_TEST.some((p) => p.test(f)));
-  } catch {
-    return false;
-  }
+  if (bases.some((b) => dirs.some((d) => existsSync(join(b, d))))) return true;
+  return bases.some((b) => {
+    try {
+      return readdirSync(b).some((f) => PATRONES_TEST.some((p) => p.test(f)));
+    } catch {
+      return false;
+    }
+  });
 }
 
 export function tieneCI(raiz: string): boolean {

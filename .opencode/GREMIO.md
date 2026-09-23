@@ -4,6 +4,15 @@
 > La unidad de trabajo es un **ticket con artefactos**. El estado vive en `board/`, no en el contexto.
 > Regla de oro: **no arrastres contexto de otros tickets; leé el ticket que te toca.**
 
+## Entorno vs proyecto (regla dura)
+
+- `.opencode/`, `opencode.json` y `AGENTS.md` son **el entorno del Gremio** (infraestructura), **no código del proyecto**: nunca se editan como parte del trabajo ni se cuentan como tickets de producto.
+- El **código del proyecto** vive en su propio árbol dentro del repo (por ejemplo `app/`, `src/` o la carpeta que defina el usuario). Los roles trabajan ahí.
+- `board/` es del Gremio (tablero); el producto es del usuario.
+- Excepciones controladas (tarea del Gremio, no del producto): encender/apagar un MCP en `opencode.json` (DevOps) y la puesta en marcha de git.
+- Si resolver el producto parece requerir tocar `.opencode/`, `opencode.json` o `AGENTS.md`: **no se toca**. Se escala al Lead y el Lead lo deriva al usuario (es tema del ecosistema, no del proyecto).
+- Ningún rol propone commitear el entorno como si fuera trabajo del usuario.
+
 ## Organigrama
 
 | Rol | Modo | Responsabilidad |

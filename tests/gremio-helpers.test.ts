@@ -111,6 +111,26 @@ describe("detectarWeb", () => {
     const raiz = crear({ "package.json": "{ roto" });
     expect(detectarWeb(raiz).es).toBe(false);
   });
+  it("app/package.json con react (app en carpeta hermana) → web app", () => {
+    const raiz = crear({ "app/package.json": pkg({ react: "^19" }) });
+    const r = detectarWeb(raiz);
+    expect(r.es).toBe(true);
+    expect(r.stack).toContain("react");
+    expect(r.senales.some((s) => s.startsWith("app/package.json"))).toBe(true);
+  });
+  it("raíz con vitest + app/ con react → web app por react, no por vite", () => {
+    const raiz = crear({
+      "package.json": pkg({ vitest: "^5" }),
+      "app/package.json": pkg({ react: "^19" }),
+    });
+    const r = detectarWeb(raiz);
+    expect(r.es).toBe(true);
+    expect(r.stack).toEqual(["react"]);
+  });
+  it("app/ con index.html → web app", () => {
+    const raiz = crear({ "app/index.html": "<html></html>" });
+    expect(detectarWeb(raiz).es).toBe(true);
+  });
 });
 
 describe("tieneTests", () => {
@@ -125,6 +145,12 @@ describe("tieneTests", () => {
   });
   it("sin tests → false", () => {
     expect(tieneTests(crear({ "README.md": "x" }))).toBe(false);
+  });
+  it("carpeta app/tests/ (app en carpeta hermana)", () => {
+    expect(tieneTests(crear({ "app/tests/": true }))).toBe(true);
+  });
+  it("archivo app/test_x.py", () => {
+    expect(tieneTests(crear({ "app/test_x.py": "x" }))).toBe(true);
   });
 });
 

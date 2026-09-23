@@ -18,7 +18,15 @@
 # =============================================================================
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resuelve enlaces simbólicos: si llamás al instalador por un symlink en el PATH,
+# igual encuentra el paquete. (Idioma portable, sin depender de `readlink -f`.)
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  case "$SOURCE" in /*) ;; *) SOURCE="$DIR/$SOURCE" ;; esac
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 TARGET="$PWD"
 DRY_RUN=0
 KEEP_PACKAGE=0

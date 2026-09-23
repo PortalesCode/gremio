@@ -102,6 +102,24 @@ Qué hace el instalador:
 
 Luego reiniciá OpenCode. Arranca directo en el **Lead**.
 
+## El comando global (opcional)
+
+Para instalarlo en cualquier repo con un solo comando, dejalo en tu `PATH`:
+
+```bash
+ln -s "$(pwd)/install.sh" ~/.local/bin/gremio
+```
+
+Desde la carpeta de cualquier proyecto:
+
+```bash
+gremio            # instala Gremio en el repo actual
+gremio --dry-run  # muestra qué haría, sin copiar
+gremio --target <dir>
+```
+
+Para actualizar el paquete: `git -C <ruta-del-clon> pull`. El instalador resuelve enlaces simbólicos, así que funciona aunque se llame por el enlace.
+
 ## Uso
 
 Hablale al Lead. Ejemplo: *"hacé que el proyecto se vea más profesional"* → el Lead pregunta lo justo, abre tickets y arranca el equipo.

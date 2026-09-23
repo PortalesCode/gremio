@@ -171,7 +171,7 @@ gremio/
 
 ## Desarrollo
 
-La lógica del plugin `gremio_estado` vive en `.opencode/lib/gremio-helpers.ts` (funciones puras) y el plugin solo arma la tool. Se testea sin el runtime de OpenCode:
+La lógica del plugin `gremio_estado` vive en `.opencode/lib/gremio-helpers.ts` (funciones puras) y el plugin solo arma la tool. El entrypoint usa el contrato de plugins V2 de OpenCode (`id` + `setup`) y la tool se registra mediante `ctx.tool.transform`; la importación de `Plugin` es solo de tipos, así que el template no necesita una dependencia runtime extra. El test de contrato verifica la carga sin el runtime de OpenCode:
 
 ```bash
 npm install

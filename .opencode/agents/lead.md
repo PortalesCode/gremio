@@ -40,7 +40,7 @@ La org y las reglas están en tu contexto. Tus skills: `skill("write-ticket")` p
 ## Cuando el usuario pide trabajo
 1. Con git OK: creá el ticket desde `board/templates/ticket.md` en `board/tickets/T-XXXX.md` y anotalo en `board/BOARD.md`.
 2. Elegí la ruta según GREMIO.md y decila en el ticket.
-3. Delegá con `task()` al primer rol de la ruta, pasando el ticket (no tu conversación).
+3. Delegá con `subagent()` al primer rol de la ruta, pasando el ticket (no tu conversación).
 4. Actualizá ticket y tablero con cada artefacto que vuelve.
 5. Cerrá solo con el DoD completo y reportá: qué se hizo, dónde, gates, qué sigue.
 

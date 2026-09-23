@@ -13,10 +13,9 @@
  * OpenCode). Este archivo solo arma la tool.
  */
 
-import { existsSync, readdirSync } from "fs";
-import { join } from "path";
-import { tool } from "@opencode-ai/plugin";
-import type { Plugin } from "@opencode-ai/plugin";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+import type { Plugin } from "@opencode/plugin";
 import {
   leerRama,
   leerRemoto,
@@ -27,15 +26,28 @@ import {
   tieneCI,
 } from "../lib/gremio-helpers";
 
-export default (async ({ directory }) => {
-  return {
-    tool: {
-      gremio_estado: tool({
-        description:
-          "Estado del proyecto para el Gremio: raíz, repo git (rama, remoto, commits), tablero, web app, herramientas encendidas y base del proyecto (tests, CI, README, CONTRIBUTING, licencia). Read-only, sin shell. Llamala al arrancar cada sesión.",
-        args: {},
-        async execute(_args, context) {
-          const raiz = context.directory || directory;
+const DESCRIPTION =
+  "Estado del proyecto para el Gremio: raíz, repo git (rama, remoto, commits), tablero, web app, herramientas encendidas y base del proyecto (tests, CI, README, CONTRIBUTING, licencia). Read-only, sin shell. Llamala al arrancar cada sesión.";
+
+export default {
+  id: "gremio.estado",
+  async setup(ctx) {
+    const directory = ctx.location.directory;
+
+    await ctx.tool.transform((tools) => {
+      tools.add({
+        name: "gremio_estado",
+        description: DESCRIPTION,
+        input: {
+          type: "object",
+          properties: {},
+          additionalProperties: false,
+        },
+        options: {
+          codemode: false,
+        },
+        async execute() {
+          const raiz = directory;
           const gitDir = join(raiz, ".git");
           const esGit = existsSync(gitDir);
           const rama = esGit ? leerRama(gitDir) : null;
@@ -46,7 +58,7 @@ export default (async ({ directory }) => {
           let tickets = 0;
           try {
             tickets = readdirSync(join(raiz, "board", "tickets")).filter((f) =>
-              /^T-\d+\.md$/.test(f)
+              /^T-\d+\.md$/.test(f),
             ).length;
           } catch {
             tickets = 0;
@@ -68,7 +80,7 @@ export default (async ({ directory }) => {
           if (!esGit) {
             avisos.push(
               "NO es un repo git: no abras tickets de trabajo. Podés conversar y planificar. " +
-                "Guiá al usuario: (1) correr `git init`, o (2) ticket de setup ejecutado por DevOps."
+                "Guiá al usuario: (1) correr `git init`, o (2) ticket de setup ejecutado por DevOps.",
             );
           } else if (!commits) {
             avisos.push("Repo git sin commits: el primer commit corresponde al ticket de setup (DevOps).");
@@ -76,7 +88,7 @@ export default (async ({ directory }) => {
           if (web.es && !devtoolsOn) {
             avisos.push(
               "Es una web app y Chrome DevTools está apagado: preguntale al usuario si quiere encenderlo " +
-                "para verificación visual (QA). Si acepta, es tarea directa de DevOps; recordá al final: reiniciar OpenCode."
+                "para verificación visual (QA). Si acepta, es tarea directa de DevOps; recordá al final: reiniciar OpenCode.",
             );
           }
           if (esGit && commits && !base.tests) {
@@ -89,27 +101,29 @@ export default (async ({ directory }) => {
             avisos.push("Sin remoto: se trabaja local (rama + commits). El remoto solo hace falta para PR/CI/deploy.");
           }
 
-          return JSON.stringify(
-            {
-              raiz,
-              es_git: esGit,
-              rama,
-              remoto,
-              tiene_commits: commits,
-              board: tieneBoard ? join(raiz, "board") : null,
-              tickets,
-              web_app: web.es,
-              web_stack: web.stack,
-              web_senales: web.senales,
-              herramientas,
-              base,
-              aviso: avisos.length > 0 ? avisos.join(" ") : null,
-            },
-            null,
-            2
-          );
+          return {
+            content: JSON.stringify(
+              {
+                raiz,
+                es_git: esGit,
+                rama,
+                remoto,
+                tiene_commits: commits,
+                board: tieneBoard ? join(raiz, "board") : null,
+                tickets,
+                web_app: web.es,
+                web_stack: web.stack,
+                web_senales: web.senales,
+                herramientas,
+                base,
+                aviso: avisos.length > 0 ? avisos.join(" ") : null,
+              },
+              null,
+              2,
+            ),
+          };
         },
-      }),
-    },
-  };
-}) satisfies Plugin;
+      });
+    });
+  },
+} satisfies Plugin;

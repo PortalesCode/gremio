@@ -173,6 +173,19 @@ describe("leerHerramientas", () => {
     });
     expect(leerHerramientas(raiz)).toEqual({ "chrome-devtools": false, context7: true });
   });
+  it("lee configuración V2 con mcp.servers y disabled", () => {
+    const raiz = crear({
+      "opencode.json": JSON.stringify({
+        mcp: {
+          servers: {
+            context7: { disabled: false },
+            playwright: { disabled: true },
+          },
+        },
+      }),
+    });
+    expect(leerHerramientas(raiz)).toEqual({ context7: true, playwright: false });
+  });
   it("sin opencode.json → null", () => {
     expect(leerHerramientas(crear({}))).toBeNull();
   });

@@ -156,11 +156,17 @@ export function leerHerramientas(raiz: string): Record<string, boolean> | null {
     const cfg = join(raiz, "opencode.json");
     if (!existsSync(cfg)) return null;
     const j = JSON.parse(readFileSync(cfg, "utf-8"));
-    const mcp = j.mcp ?? {};
+    const mcpRoot = j.mcp && typeof j.mcp === "object" ? j.mcp : {};
+    const mcp =
+      mcpRoot.servers && typeof mcpRoot.servers === "object" ? mcpRoot.servers : mcpRoot;
     const out: Record<string, boolean> = {};
     for (const [k, v] of Object.entries(mcp)) {
-      const valor = v as { enabled?: boolean } | null;
-      out[k] = !(valor && typeof valor === "object" && valor.enabled === false);
+      const valor = v as { enabled?: boolean; disabled?: boolean } | null;
+      const enabled =
+        valor && typeof valor === "object"
+          ? valor.enabled !== false && valor.disabled !== true
+          : true;
+      out[k] = enabled;
     }
     return Object.keys(out).length > 0 ? out : null;
   } catch {

@@ -85,40 +85,42 @@ Un ticket se cierra solo si: el código está en el repo, los tests pasan (coman
 
 ## Instalación
 
+### 1. En tu computadora (una sola vez)
+
 ```bash
-git clone https://github.com/PortalesCode/gremio.git
-cd tu-proyecto
-../gremio/install.sh
+git clone https://github.com/PortalesCode/gremio.git ~/tools/gremio
+~/tools/gremio/install.sh --setup
 ```
 
-Opciones: `--target <dir>`, `--dry-run`, `--keep-package`.
+Eso deja el comando **`gremio`** en tu PATH. Si algún día borrás la carpeta `~/tools/gremio`, el comando la **vuelve a clonar solo**.
+
+### 2. En cada proyecto
+
+```bash
+cd tu-proyecto
+gremio
+```
+
+Opciones: `--dry-run` (muestra sin copiar), `--target <dir>`, `--keep-package`.
 
 Qué hace el instalador:
 - Copia `.opencode/` (agentes, skills, plugin) siempre.
 - Crea `board/` solo con lo que falta: **no pisa tu tablero**.
 - Inyecta el documento del equipo en tu `AGENTS.md` entre los marcadores `<!-- GREMIO-START -->` y `<!-- GREMIO-END -->`, sin tocar el resto. En reinstalaciones, solo actualiza ese bloque.
 - Mergea `opencode.json` (MCPs, permisos, `default_agent: lead`) sin pisar tus claves.
-- Avisa si el destino no es un repo git.
+- Avisa si el destino no es un repo git o si el proyecto define otro `default_agent`.
 
 Luego reiniciá OpenCode. Arranca directo en el **Lead**.
 
-## El comando global (opcional)
+## Comandos
 
-Para instalarlo en cualquier repo con un solo comando, dejalo en tu `PATH`:
-
-```bash
-ln -s "$(pwd)/install.sh" ~/.local/bin/gremio
-```
-
-Desde la carpeta de cualquier proyecto:
-
-```bash
-gremio            # instala Gremio en el repo actual
-gremio --dry-run  # muestra qué haría, sin copiar
-gremio --target <dir>
-```
-
-Para actualizar el paquete: `git -C <ruta-del-clon> pull`. El instalador resuelve enlaces simbólicos, así que funciona aunque se llame por el enlace.
+| Comando | Qué hace |
+|---|---|
+| `gremio` | Instala Gremio en el repo actual |
+| `gremio --dry-run` | Muestra qué haría, sin copiar nada |
+| `gremio --target <dir>` | Instala en otra carpeta |
+| `gremio update` | Actualiza el paquete a la última versión |
+| `gremio --version` | Muestra la versión instalada |
 
 ## Uso
 

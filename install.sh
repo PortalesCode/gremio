@@ -12,14 +12,13 @@
 #   ./install.sh                    # instala en el directorio actual
 #   ./install.sh --target <dir>     # instala en <dir>
 #   ./install.sh --dry-run          # muestra qué haría, sin copiar
+#   ./install.sh --setup            # instala el comando global `gremio` (una vez)
 #   ./install.sh --keep-package     # no borra el paquete al terminar
 #
 # Es idempotente: ejecutarlo dos veces no rompe nada.
 # =============================================================================
 set -euo pipefail
 
-# Resuelve enlaces simbólicos: si llamás al instalador por un symlink en el PATH,
-# igual encuentra el paquete. (Idioma portable, sin depender de `readlink -f`.)
 SOURCE="${BASH_SOURCE[0]}"
 while [ -L "$SOURCE" ]; do
   DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
@@ -30,6 +29,7 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 TARGET="$PWD"
 DRY_RUN=0
 KEEP_PACKAGE=0
+SETUP=0
 START_MARK="<!-- GREMIO-START -->"
 END_MARK="<!-- GREMIO-END -->"
 
@@ -38,18 +38,71 @@ while [ $# -gt 0 ]; do
     --target) TARGET="${2:-}"; shift 2 ;;
     --dry-run) DRY_RUN=1; shift ;;
     --keep-package) KEEP_PACKAGE=1; shift ;;
-    -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    --setup) SETUP=1; shift ;;
+    -h|--help)
+      awk 'NR==1{next} /^# =+$/{c++; if(c==2) exit; next} c==1 {sub(/^# ?/,""); print}' "$0"
+      exit 0 ;;
     *) echo "Opción desconocida: $1" >&2; exit 1 ;;
   esac
 done
-
-[ -d "$TARGET" ] || { echo "No existe el destino: $TARGET" >&2; exit 1; }
-TARGET="$(cd "$TARGET" && pwd)"
 
 run()  { if [ "$DRY_RUN" -eq 1 ]; then echo "  [dry-run] $*"; else "$@"; fi; }
 info() { printf '==> %s\n' "$*"; }
 ok()   { printf '  ✓ %s\n' "$*"; }
 warn() { printf '  aviso: %s\n' "$*" >&2; }
+
+# Instala el comando global `gremio` en un directorio del PATH.
+setup_command() {
+  local url bin=""
+  url="$(git -C "$SCRIPT_DIR" remote get-url origin 2>/dev/null || echo "https://github.com/PortalesCode/gremio.git")"
+  for d in "$HOME/.local/bin" "$HOME/bin" "/usr/local/bin"; do
+    case ":$PATH:" in
+      *":$d:"*) if [ -w "$d" ] 2>/dev/null; then bin="$d"; break; fi ;;
+    esac
+  done
+  if [ -z "$bin" ]; then
+    warn "no encontré un directorio escribible en tu PATH (~/.local/bin). Creá ~/.local/bin, agregalo al PATH y reintentá."
+    exit 1
+  fi
+  if [ "$DRY_RUN" -eq 1 ]; then echo "  [dry-run] escribir $bin/gremio"; exit 0; fi
+  cat > "$bin/gremio" <<EOF
+#!/usr/bin/env bash
+# gremio — comando global, generado por install.sh --setup.
+#   gremio            instala Gremio en el directorio actual
+#   gremio update     actualiza el paquete (git pull)
+#   gremio --version  muestra la versión
+#   gremio <args>     pasa argumentos al instalador (--dry-run, --target, etc.)
+# Si la carpeta del paquete se borra, la vuelve a clonar sola.
+set -euo pipefail
+GREMIO_DIR="\${GREMIO_DIR:-$SCRIPT_DIR}"
+GREMIO_URL="\${GREMIO_URL:-$url}"
+if [ ! -x "\$GREMIO_DIR/install.sh" ]; then
+  echo "Gremio no está en \$GREMIO_DIR. Reinstalando el paquete..." >&2
+  mkdir -p "\$(dirname "\$GREMIO_DIR")"
+  git clone --depth 1 "\$GREMIO_URL" "\$GREMIO_DIR"
+fi
+case "\${1:-}" in
+  update) git -C "\$GREMIO_DIR" pull --ff-only ;;
+  --version|-v)
+    echo "Gremio (\$GREMIO_DIR)"
+    git -C "\$GREMIO_DIR" log --oneline -1
+    ;;
+  *) exec "\$GREMIO_DIR/install.sh" "\$@" ;;
+esac
+EOF
+  chmod +x "$bin/gremio"
+  ok "comando global instalado: $bin/gremio"
+  info "Probalo: cd <tu-repo> && gremio"
+  info "Actualizar el paquete: gremio update"
+  exit 0
+}
+
+if [ "$SETUP" -eq 1 ]; then
+  setup_command
+fi
+
+[ -d "$TARGET" ] || { echo "No existe el destino: $TARGET" >&2; exit 1; }
+TARGET="$(cd "$TARGET" && pwd)"
 
 verify_package() {
   for f in ".opencode/agents/lead.md" ".opencode/GREMIO.md" "opencode.json"; do

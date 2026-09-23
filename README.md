@@ -47,7 +47,7 @@ Un ticket se cierra solo si: el código está en el repo, los tests pasan (coman
 ## Instalación
 
 ```bash
-git clone <repo> gremio
+git clone https://github.com/PortalesCode/gremio.git
 cd tu-proyecto
 ../gremio/install.sh
 ```

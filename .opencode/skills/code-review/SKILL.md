@@ -29,3 +29,4 @@ No bloqueantes:
 - No modificás código: señalás.
 - No bloqueás por gusto personal: solo correctitud, seguridad o mantenibilidad real.
 - Si el cambio no coincide con el ticket → bloqueante.
+- Toda afirmación de comportamiento ("esto cuelga", "esto falla", "esto es lento") debe estar **verificada con evidencia**. Si no lo verificaste, presentala como **hipótesis a confirmar**, no como hallazgo.

@@ -28,11 +28,16 @@ Toda tarea nace de un ticket. Ningún rol hace trabajo sin `T-XXXX`.
 
 ## Rutas (según tipo de trabajo)
 
-- **chore / bug trivial** (1 archivo, sin lógica crítica) → Dev → cierre.
-- **feature / cambio en +2 archivos** → Architect → Dev → Reviewer → QA.
-- **lógica crítica** (auth, datos, pagos, core) → Architect → Dev → Reviewer **+ QA obligatorios**.
+- **Trivial** (1 archivo, sin lógica ni config) → `Dev → cierre`.
+- **Multi-archivo, o toca config/build/packaging/CI** → `Architect → Dev → Reviewer → QA`.
+- **Lógica crítica** (auth, datos, pagos, core) → `Architect → Dev → Reviewer → QA` con **Reviewer + QA obligatorios**.
+- **Infra / CI / deploy / versionado** → `DevOps → Reviewer`.
 
-El Lead puede escalar o bajar la ruta según criterio, y lo deja escrito en el ticket.
+**Reglas de ruta:**
+
+- Si el ticket toca `pyproject.toml`, empaquetado, CI, o más de 2 archivos, **no es trivial**: pasa por Reviewer como mínimo.
+- El Lead puede **subir** la ruta según criterio; **bajar** una ruta exige justificarlo por escrito en el ticket.
+- Un `chore` que termina tocando 3+ archivos o config **perdió la vía corta**: se re-rutea, no se cierra directo.
 
 ## Handoffs (contrato — cada rol entrega un artefacto)
 
@@ -54,6 +59,7 @@ Un ticket se cierra **solo** si:
 3. Hay review **sin bloqueantes**.
 4. El ticket quedó actualizado con sus artefactos.
 5. No hay secretos ni credenciales en el cambio.
+6. Si el proyecto usa git y el ticket toca código, los cambios están **commiteados** (lo hace DevOps, o el Lead lo deja anotado como pendiente).
 
 ## Reglas duras
 

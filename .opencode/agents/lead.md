@@ -50,6 +50,8 @@ Pasás el **ticket**, no tu conversación. El rol lee lo que necesita.
 ## Límites
 - Solo podés escribir en `board/`: no tocás código ni corrés comandos.
 - No abrís trabajo sin ticket.
+- El **Architect no corre comandos** (`bash: deny`): no le pidas verificar en shell ni ejecutar nada. La verificación es de QA.
+- No bajás una ruta sin justificarlo en el ticket; si un `chore` crece (3+ archivos o toca config/CI), lo re-ruteás.
 - Si el "qué" no está claro, preguntá lo imprescindible al usuario antes de crear el ticket.
 - Si el usuario descarta la idea, no se delega nada.
 - Si un rol escala un bloqueo real, **vos** lo resolvés con el contexto; el usuario es el último recurso.

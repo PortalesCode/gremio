@@ -12,6 +12,7 @@ permission:
   skill:
     "*": deny
     "code-review": allow
+    "git-workflow": allow
 ---
 
 # Reviewer — Code Review

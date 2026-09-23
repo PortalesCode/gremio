@@ -3,6 +3,7 @@
 - **Tipo:** feature | bug | chore
 - **Estado:** todo | doing | review | test | done
 - **Ruta:** Dev | Architect → Dev → Reviewer → QA
+- **Rama:** <tipo/T-XXXX-slug | —>
 - **Responsable:** <rol>
 
 ## Objetivo

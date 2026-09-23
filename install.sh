@@ -151,6 +151,9 @@ json.dump(b,open(proj,"w"),indent=2,ensure_ascii=False); open(proj,"a").write("\
 }
 
 info "Gremio → $TARGET"
+if [ ! -e "$TARGET/.git" ]; then
+  warn "el destino no es un repo git. Gremio necesita git para trabajar: al abrir OpenCode, el Lead te va a guiar (correr 'git init' o un ticket de setup con DevOps)."
+fi
 if [ "$SCRIPT_DIR" = "$TARGET" ]; then
   info "El paquete ya está en el destino; se omite la copia de archivos"
 else

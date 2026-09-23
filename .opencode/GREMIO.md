@@ -26,6 +26,25 @@ Solo el **Lead** habla con el usuario. El resto reporta a quien lo invocó.
 
 Toda tarea nace de un ticket. Ningún rol hace trabajo sin `T-XXXX`.
 
+## Repo git (requisito para trabajar)
+
+- El Gremio trabaja **con git**: es la red de seguridad (historial, ramas, diffs, rollback).
+- **El Lead puede conversar, responder y planificar siempre. Pero NO abre tickets de trabajo si el proyecto no es un repo git.**
+- Si no hay git, el Lead guía al usuario con dos opciones:
+  1. El usuario corre `git init` (una línea), o
+  2. El equipo lo hace en un **ticket de setup** (excepción de bootstrap: es el único ticket permitido sin git). Lo ejecuta DevOps con la skill `project-setup`.
+- El **remoto no es obligatorio**: se necesita para PR y deploy. Sin remoto se trabaja con rama + commits locales.
+- Crear repos, pushear o mergear PR **siempre** requiere aprobación explícita del usuario. Repo nuevo por defecto: **privado**.
+- El flujo git (ramas por ticket, commits, PR, merge) está en la skill `git-workflow`.
+
+## Proyecto y multi-proyecto
+
+- OpenCode trabaja en la carpeta donde lo abrís: esa carpeta **es** el proyecto.
+- **Un proyecto = un repo = un tablero.** Cada proyecto tiene su propio `board/` y sus IDs de ticket. No hay estado compartido entre proyectos (eso mantiene el contexto chico y evita mezclar trabajo).
+- El Lead confirma al arrancar: `Proyecto: <nombre> — raíz <ruta> — git: sí/no — remoto: sí/no`.
+- Si el usuario habla de otro proyecto, el Lead lo deriva: hay que abrir OpenCode en la carpeta de ese proyecto.
+- Si la carpeta no es git y parece contener varios proyectos, el Lead guía a abrir la carpeta correcta o a crear uno nuevo.
+
 ## Rutas (según tipo de trabajo)
 
 - **Trivial** (1 archivo, sin lógica ni config) → `Dev → cierre`.
@@ -46,7 +65,7 @@ Toda tarea nace de un ticket. Ningún rol hace trabajo sin `T-XXXX`.
 - **Dev → Reviewer:** qué cambió, dónde, cómo probarlo.
 - **Reviewer → Lead:** `aprobado` o `bloqueado` + hallazgos (bloqueantes / no bloqueantes).
 - **QA → Lead:** DoD verificado `sí/no` + evidencia (comando y resultado).
-- **DevOps → Lead:** qué se desplegó, cómo revertir.
+- **DevOps → Lead:** rama/PR/merge, qué se desplegó, cómo revertir.
 
 No se pasa contexto crudo entre roles: se pasa el ticket + el artefacto.
 

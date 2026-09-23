@@ -1,5 +1,9 @@
 # Board — Gremio
 
+- **Proyecto:** <nombre>
+- **Raíz:** <ruta>
+- **Remoto:** <url | sin remoto>
+
 Índice de tickets del equipo. El Lead lo mantiene.
 
 | ID | Título | Tipo | Ruta | Estado | Responsable |

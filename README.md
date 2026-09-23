@@ -9,7 +9,7 @@ Un equipo real no se coordina releyendo todo el contexto: se coordina con **rol 
 | | Crisol Definitivo | Gremio |
 |---|---|---|
 | Contexto fijo por request | ~33-38k tokens | **~5-7k tokens** |
-| Documento del equipo | AGENTS.md 24 KB | ~3 KB |
+| Documento del equipo | AGENTS.md 24 KB | ~4 KB |
 | Prompts de agente | hasta 33 KB | ~1-2 KB cada uno |
 | Reglas | repetidas en 4 lados | 1 sola fuente |
 | MCPs activos | 7 (~100 tools) | 3, resto denegado |
@@ -19,22 +19,37 @@ Un equipo real no se coordina releyendo todo el contexto: se coordina con **rol 
 
 | Rol | Qué hace | Puede escribir |
 |---|---|---|
-| **Lead** | Única voz con el usuario. Crea el ticket, elige la ruta, delega y reporta. | solo `board/` |
+| **Lead** | Única voz con el usuario. Confirma el proyecto, verifica git, crea el ticket, elige la ruta, delega y reporta. | solo `board/` |
 | **Architect** | Diseño técnico, interfaces, ADRs, plan. | solo `board/` |
 | **Dev** | Implementa código + tests. | código |
 | **Reviewer** | Code review y seguridad (gate). | solo `board/` |
 | **QA** | Tests, edge cases, verifica el DoD (gate). | tests |
-| **DevOps** | CI/CD, infra, deploy. | código/infra |
+| **DevOps** | Git, setup del repo, ramas/PRs, CI/CD, deploy. | código/infra |
 
 Flujo típico: `Lead → Dev → Reviewer + QA`. Architect y DevOps entran cuando la tarea los pide.
 
-Cada rol ve **solo su skill**: el de desarrollo no ve la de deploy, y viceversa.
+Cada rol ve **solo sus skills**: el de desarrollo no ve la de deploy, y viceversa.
+
+## Git: requisito para trabajar
+
+Gremio trabaja **con git** (historial, ramas, PRs, rollback). El Lead **puede conversar y planificar siempre**, pero **no abre tickets de trabajo si el proyecto no es un repo git**. Si no lo es, te guía con dos opciones:
+
+1. Correr `git init` (una línea), o
+2. Un **ticket de setup** que ejecuta DevOps (git init + primer commit + remoto opcional).
+
+El **remoto no es obligatorio**: hace falta para PR y deploy. Sin remoto se trabaja con rama + commits locales. Crear repos, pushear o mergear PR **siempre** requiere tu aprobación; repo nuevo por defecto **privado**.
+
+## Varios proyectos a la vez
+
+OpenCode trabaja en la carpeta donde lo abrís. **Un proyecto = un repo = un tablero**: cada uno tiene su propio `board/` y sus IDs de ticket, sin estado compartido (eso mantiene el contexto chico y evita mezclar trabajo).
+
+Para trabajar en varios proyectos, abrí una sesión de OpenCode **en la carpeta de cada proyecto**. El Lead te dice al arrancar en cuál está parado.
 
 ## El tablero
 
 ```
 board/
-├── BOARD.md            # índice de tickets y estado
+├── BOARD.md            # proyecto + índice de tickets y estado
 ├── tickets/T-XXXX.md   # un archivo por ticket, con sus artefactos
 ├── adr/ADR-XXXX.md     # decisiones de arquitectura
 └── templates/          # plantillas de ticket y ADR
@@ -42,7 +57,7 @@ board/
 
 ## Definición de Done
 
-Un ticket se cierra solo si: el código está en el repo, los tests pasan (comando documentado), hay review sin bloqueantes, el ticket tiene sus artefactos, y no hay secretos.
+Un ticket se cierra solo si: el código está en el repo, los tests pasan (comando documentado), hay review sin bloqueantes, el ticket tiene sus artefactos, no hay secretos, y los cambios quedaron **commiteados**.
 
 ## Instalación
 
@@ -55,16 +70,17 @@ cd tu-proyecto
 Opciones: `--target <dir>`, `--dry-run`, `--keep-package`.
 
 Qué hace el instalador:
-- Copia `.opencode/` (agentes y skills) siempre.
+- Copia `.opencode/` (agentes, skills, plugin) siempre.
 - Crea `board/` solo con lo que falta: **no pisa tu tablero**.
-- Inyecta el documento del equipo en tu `AGENTS.md` entre los marcadores `<!-- GREMIO-START -->` y `<!-- GREMIO-END -->`, sin tocar el resto de tu archivo. En reinstalaciones, solo actualiza ese bloque.
+- Inyecta el documento del equipo en tu `AGENTS.md` entre los marcadores `<!-- GREMIO-START -->` y `<!-- GREMIO-END -->`, sin tocar el resto. En reinstalaciones, solo actualiza ese bloque.
 - Mergea `opencode.json` (MCPs, permisos, `default_agent: lead`) sin pisar tus claves.
+- Avisa si el destino no es un repo git.
 
 Luego reiniciá OpenCode. Arranca directo en el **Lead**.
 
 ## Uso
 
-Hablale al Lead. Ejemplo: *"el login falla con emails en mayúscula"* → el Lead crea el ticket, elige la ruta y arranca el equipo.
+Hablale al Lead. Ejemplo: *"hacé que el proyecto se vea más profesional"* → el Lead pregunta lo justo, abre tickets y arranca el equipo.
 
 ## Estructura
 
@@ -73,7 +89,8 @@ gremio/
 ├── .opencode/
 │   ├── GREMIO.md        # doc del equipo (se inyecta en tu AGENTS.md)
 │   ├── agents/          # lead, architect, dev, reviewer, qa, devops
-│   └── skills/          # 8 runbooks on-demand
+│   ├── skills/          # runbooks on-demand (incluye git-workflow y project-setup)
+│   └── plugins/         # tool gremio_estado (estado del proyecto: git + board)
 ├── board/               # tablero de tickets
 ├── opencode.json        # MCPs mínimos + permisos + default_agent
 └── install.sh
@@ -82,5 +99,5 @@ gremio/
 ## Notas
 
 - Gremio es agnóstico de stack: las particularidades van en skills.
-- Los MCPs pesados (chrome-devtools, playwright, markitdown, headroom) quedan **denegados** por defecto. Si los necesitás, quitá su línea de `permission` en `opencode.json` (y considerá habilitarlos por agente).
+- Los MCPs pesados (chrome-devtools, playwright, markitdown, headroom) quedan **denegados** por defecto. Si los necesitás, quitá su línea de `permission` en `opencode.json`.
 - Si tenés un `AGENTS.md` global en `~/` de otro ecosistema, OpenCode lo sigue inyectando: revisalo para no pagar tokens de reglas que no usás.

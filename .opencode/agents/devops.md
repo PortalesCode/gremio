@@ -12,6 +12,7 @@ permission:
     "ship": allow
     "git-workflow": allow
     "project-setup": allow
+    "ci-setup": allow
 ---
 
 # DevOps — Infra, Git y Entrega

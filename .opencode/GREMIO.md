@@ -66,6 +66,16 @@ Toda tarea nace de un ticket. Ningún rol hace trabajo sin `T-XXXX`.
 - El Lead puede **subir** la ruta según criterio; **bajar** una ruta exige justificarlo por escrito en el ticket.
 - Un `chore` que termina tocando 3+ archivos o config **perdió la vía corta**: se re-rutea, no se cierra directo.
 
+## Puesta en marcha (base del proyecto)
+
+Si al proyecto le falta base, el Lead **ofrece** estos pasos, cada uno como ticket:
+
+1. `project-setup` (DevOps) — git init, remoto opcional, primer commit.
+2. `test-setup` (Dev) — runner de tests, primer test real y comando único documentado.
+3. `ci-setup` (DevOps) — CI en GitHub + **branch protection** (el PR no mergea sin CI verde ni aprobación).
+
+El modelo de rama (simple o GitFlow) se define en `git-workflow` y queda escrito en el board.
+
 ## Handoffs (contrato — cada rol entrega un artefacto)
 
 - **Lead → Architect/Dev:** objetivo, tipo, alcance, exclusiones, restricciones, DoD.

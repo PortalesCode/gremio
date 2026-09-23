@@ -39,6 +39,16 @@ Gremio trabaja **con git** (historial, ramas, PRs, rollback). El Lead **puede co
 
 El **remoto no es obligatorio**: hace falta para PR y deploy. Sin remoto se trabaja con rama + commits locales. Crear repos, pushear o mergear PR **siempre** requiere tu aprobación; repo nuevo por defecto **privado**.
 
+## Puesta en marcha de un proyecto
+
+Si al proyecto le falta base, el Lead ofrece tres pasos, cada uno como ticket:
+
+1. **`project-setup`** (DevOps) — git init, remoto opcional, primer commit.
+2. **`test-setup`** (Dev) — runner de tests, primer test real y comando único.
+3. **`ci-setup`** (DevOps) — CI en GitHub con tests en cada push/PR, más **branch protection** (el PR no mergea sin CI verde ni aprobación).
+
+El modelo de rama (simple o GitFlow) se elige en `git-workflow`.
+
 ## Herramientas pesadas (MCPs)
 
 Tres MCPs livianos vienen **encendidos**: `context7` (docs), `codegraph` (grafo de código) y `sequential-thinking` (razonamiento). El resto viene **apagado** (`enabled: false`) con su definición lista:
@@ -102,7 +112,7 @@ gremio/
 ├── .opencode/
 │   ├── GREMIO.md        # doc del equipo (se inyecta en tu AGENTS.md)
 │   ├── agents/          # lead, architect, dev, reviewer, qa, devops
-│   ├── skills/          # runbooks on-demand (incluye git-workflow y project-setup)
+│   ├── skills/          # runbooks on-demand (git, setup, tests, CI, review, deploy)
 │   └── plugins/         # tool gremio_estado (estado del proyecto: git + board)
 ├── board/               # tablero de tickets
 ├── opencode.json        # MCPs mínimos + permisos + default_agent

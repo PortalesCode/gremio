@@ -13,6 +13,7 @@ permission:
     "implement": allow
     "debug": allow
     "git-workflow": allow
+    "test-setup": allow
 ---
 
 # Dev — Implementador

@@ -51,14 +51,21 @@ verify_package() {
 verify_package
 
 # Copia recursiva de archivos, sobrescribiendo los del ecosistema pero sin borrar otros.
+# Excluye artefactos que OpenCode genera en .opencode/ (node_modules, package.json, etc.).
 copy_tree() {
   local src="$1" dst="$2"
   [ -d "$src" ] || return 0
   while IFS= read -r -d '' f; do
-    local rel="${f#"$src"/}" out="$dst/${f#"$src"/}"
+    local out="$dst/${f#"$src"/}"
     run mkdir -p "$(dirname "$out")"
     run cp "$f" "$out"
-  done < <(find "$src" -type f -print0)
+  done < <(find "$src" -type f \
+      -not -path '*/node_modules/*' \
+      -not -name 'package.json' \
+      -not -name 'package-lock.json' \
+      -not -name 'bun.lock' \
+      -not -name '.gitignore' \
+      -print0)
 }
 
 # Copia solo lo que no existe en destino (no pisa trabajo del usuario).
@@ -70,7 +77,22 @@ copy_missing() {
     [ -e "$out" ] && continue
     run mkdir -p "$(dirname "$out")"
     run cp "$f" "$out"
-  done < <(find "$src" -type f -print0)
+  done < <(find "$src" -type f \
+      -not -path '*/node_modules/*' \
+      -not -name 'package.json' \
+      -not -name 'package-lock.json' \
+      -not -name 'bun.lock' \
+      -not -name '.gitignore' \
+      -print0)
+}
+
+# .opencode/.gitignore: protege contra commitear los artefactos de OpenCode.
+write_opencode_gitignore() {
+  local d="$TARGET/.opencode"
+  [ -d "$d" ] || return 0
+  if [ "$DRY_RUN" -eq 1 ]; then echo "  [dry-run] escribir .opencode/.gitignore"; return 0; fi
+  printf 'node_modules\npackage.json\npackage-lock.json\nbun.lock\n.gitignore\n' > "$d/.gitignore"
+  ok ".opencode/.gitignore"
 }
 
 # Inyecta/actualiza el bloque Gremio en AGENTS.md entre marcadores.
@@ -168,6 +190,7 @@ if [ "$SCRIPT_DIR" = "$TARGET" ]; then
 else
   info "Paso 1/3 — .opencode/ (agentes y skills)"
   copy_tree "$SCRIPT_DIR/.opencode" "$TARGET/.opencode"
+  write_opencode_gitignore
 
   info "Paso 2/3 — board/ (solo lo faltante)"
   copy_missing "$SCRIPT_DIR/board" "$TARGET/board"

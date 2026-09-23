@@ -7,6 +7,7 @@ permission:
   read: allow
   question: deny
   task: deny
+  gremio_estado: deny
   skill:
     "*": deny
     "test-and-verify": allow

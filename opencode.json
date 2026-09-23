@@ -17,12 +17,30 @@
       "type": "local",
       "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
       "enabled": true
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": false
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": false
+    },
+    "markitdown": {
+      "type": "local",
+      "command": ["uvx", "markitdown-mcp@0.0.1a4"],
+      "enabled": false
+    },
+    "headroom": {
+      "type": "local",
+      "command": ["uvx", "--from", "headroom-ai[mcp]", "headroom", "mcp", "serve"],
+      "enabled": false
     }
   },
   "permission": {
     "chrome-devtools*": "deny",
-    "playwright*": "deny",
-    "markitdown*": "deny",
-    "headroom*": "deny"
+    "playwright*": "deny"
   }
 }

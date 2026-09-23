@@ -127,7 +127,13 @@ merge_json() {
       const a=JSON.parse(fs.readFileSync(pkg,"utf8"));
       const b=JSON.parse(fs.readFileSync(proj,"utf8"));
       b.mcp=Object.assign({},a.mcp||{},b.mcp||{});
-      b.permission=Object.assign({},a.permission||{},b.permission||{});
+      // Permisos gestionados por el ecosistema: se limpian y se re-aplican (evita denegaciones viejas).
+      const ADMIN=["chrome-devtools","playwright","markitdown","headroom"];
+      const perm={};
+      for(const [k,v] of Object.entries(b.permission||{})){
+        if(!ADMIN.some(p=>k.startsWith(p))) perm[k]=v;
+      }
+      b.permission=Object.assign(perm,a.permission||{});
       if(b.default_agent===undefined&&a.default_agent!==undefined)b.default_agent=a.default_agent;
       if(b.subagent_depth===undefined&&a.subagent_depth!==undefined)b.subagent_depth=a.subagent_depth;
       fs.writeFileSync(proj,JSON.stringify(b,null,2)+"\n");
@@ -138,8 +144,11 @@ merge_json() {
 import json,sys
 pkg,proj=sys.argv[1],sys.argv[2]
 a=json.load(open(pkg)); b=json.load(open(proj))
-for key in ("mcp","permission"):
-    b[key]=dict(a.get(key,{}),**b.get(key,{}))
+b["mcp"]=dict(a.get("mcp",{}),**b.get("mcp",{}))
+ADMIN=("chrome-devtools","playwright","markitdown","headroom")
+perm={k:v for k,v in (b.get("permission") or {}).items() if not k.startswith(ADMIN)}
+perm.update(a.get("permission") or {})
+b["permission"]=perm
 if "default_agent" not in b and a.get("default_agent") is not None: b["default_agent"]=a["default_agent"]
 if "subagent_depth" not in b and a.get("subagent_depth") is not None: b["subagent_depth"]=a["subagent_depth"]
 json.dump(b,open(proj,"w"),indent=2,ensure_ascii=False); open(proj,"a").write("\n")

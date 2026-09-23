@@ -8,6 +8,8 @@ permission:
   question: deny
   task: deny
   gremio_estado: deny
+  "chrome-devtools*": allow
+  "playwright*": allow
   skill:
     "*": deny
     "test-and-verify": allow

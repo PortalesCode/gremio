@@ -12,7 +12,7 @@ Un equipo real no se coordina releyendo todo el contexto: se coordina con **rol 
 | Documento del equipo | AGENTS.md 24 KB | ~4 KB |
 | Prompts de agente | hasta 33 KB | ~1-2 KB cada uno |
 | Reglas | repetidas en 4 lados | 1 sola fuente |
-| MCPs activos | 7 (~100 tools) | 3, resto denegado |
+| MCPs activos | 7 (~100 tools) | 3 encendidos + 4 apagados listos |
 | Procedimiento | en prompts fijos | en skills on-demand |
 
 ## El equipo
@@ -38,6 +38,19 @@ Gremio trabaja **con git** (historial, ramas, PRs, rollback). El Lead **puede co
 2. Un **ticket de setup** que ejecuta DevOps (git init + primer commit + remoto opcional).
 
 El **remoto no es obligatorio**: hace falta para PR y deploy. Sin remoto se trabaja con rama + commits locales. Crear repos, pushear o mergear PR **siempre** requiere tu aprobación; repo nuevo por defecto **privado**.
+
+## Herramientas pesadas (MCPs)
+
+Tres MCPs livianos vienen **encendidos**: `context7` (docs), `codegraph` (grafo de código) y `sequential-thinking` (razonamiento). El resto viene **apagado** (`enabled: false`) con su definición lista:
+
+| MCP | Para qué | Quién lo ve al encender |
+|---|---|---|
+| `chrome-devtools` | Ver lo que ve el usuario (verificación visual) | **solo QA** |
+| `playwright` | Tests E2E de navegador | **solo QA** |
+| `markitdown` | Convertir PDFs/Office/HTML a markdown | todos |
+| `headroom` | Optimización de contexto | todos |
+
+**Encender uno es cambiar `false` → `true`** en `opencode.json`. El Lead detecta si el proyecto es una web app y te pregunta si querés encender DevTools; también podés pedirlo directo. Después, **siempre**: reiniciar OpenCode para que tome efecto.
 
 ## Varios proyectos a la vez
 
@@ -99,5 +112,5 @@ gremio/
 ## Notas
 
 - Gremio es agnóstico de stack: las particularidades van en skills.
-- Los MCPs pesados (chrome-devtools, playwright, markitdown, headroom) quedan **denegados** por defecto. Si los necesitás, quitá su línea de `permission` en `opencode.json`.
+- Los MCPs pesados vienen **apagados** (no denegados): no arrancan ni consumen hasta que los encendés. Chrome DevTools y Playwright quedan además reservados a QA.
 - Si tenés un `AGENTS.md` global en `~/` de otro ecosistema, OpenCode lo sigue inyectando: revisalo para no pagar tokens de reglas que no usás.

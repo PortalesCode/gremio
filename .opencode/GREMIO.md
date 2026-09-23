@@ -37,6 +37,14 @@ Toda tarea nace de un ticket. Ningún rol hace trabajo sin `T-XXXX`.
 - Crear repos, pushear o mergear PR **siempre** requiere aprobación explícita del usuario. Repo nuevo por defecto: **privado**.
 - El flujo git (ramas por ticket, commits, PR, merge) está en la skill `git-workflow`.
 
+## Herramientas pesadas (MCPs)
+
+- **Chrome DevTools** y **Playwright** vienen **apagados** (`enabled: false`): no se cargan hasta encenderlos. Al encenderse, solo **QA** los ve (verificación visual y E2E).
+- El Lead detecta si el proyecto es una **web app** (`web_app` en `gremio_estado`) y, si lo es, **pregunta** si encender DevTools. El usuario también puede pedirlo directo.
+- Encender o apagar es una tarea directa de **DevOps** (editar `opencode.json`, una línea): **no lleva gates**.
+- Después de encender o apagar, **siempre** avisar: *"reiniciá OpenCode para que tome efecto"*.
+- `markitdown` y `headroom` también vienen apagados; al encenderlos, quedan disponibles para todos los roles.
+
 ## Proyecto y multi-proyecto
 
 - OpenCode trabaja en la carpeta donde lo abrís: esa carpeta **es** el proyecto.

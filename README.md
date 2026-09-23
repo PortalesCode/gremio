@@ -1,5 +1,7 @@
 # Gremio — Equipo de Ingeniería de Software para OpenCode
 
+[![CI](https://github.com/PortalesCode/gremio/actions/workflows/ci.yml/badge.svg)](https://github.com/PortalesCode/gremio/actions/workflows/ci.yml)
+
 Gremio convierte a OpenCode en un **equipo real de devs**: roles con responsabilidad clara, un tablero de tickets y handoffs por artefactos. Está diseñado para **gastar pocos tokens**: el contexto fijo es chico y la profundidad se carga on-demand.
 
 ## Por qué es eficiente
@@ -145,6 +147,17 @@ gremio/
 - Gremio es agnóstico de stack: las particularidades van en skills.
 - Los MCPs pesados vienen **apagados** (no denegados): no arrancan ni consumen hasta que los encendés. Chrome DevTools y Playwright quedan además reservados a QA.
 - Si tenés un `AGENTS.md` global en `~/` de otro ecosistema, OpenCode lo sigue inyectando: revisalo para no pagar tokens de reglas que no usás.
+
+## Desarrollo
+
+La lógica del plugin `gremio_estado` vive en `.opencode/lib/gremio-helpers.ts` (funciones puras) y el plugin solo arma la tool. Se testea sin el runtime de OpenCode:
+
+```bash
+npm install
+npm test
+```
+
+El detector de web apps usa **match preciso de paquetes** (no substring): `vitest` no cuenta como `vite`, y se cubren scopes alternativos (`@remix-run/`, `@sveltejs/`, `@astrojs/`, `@vitejs/`, `@solidjs/`).
 
 ## Licencia
 

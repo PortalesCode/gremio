@@ -10,6 +10,11 @@ Thumbs.db
 node_modules/
 *.log
 
+# OpenCode: artefactos locales generados en .opencode/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
+
 # Entorno
 .env
 .env.*

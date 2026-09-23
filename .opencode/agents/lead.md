@@ -14,6 +14,7 @@ permission:
     "*": deny
     "write-ticket": allow
     "git-workflow": allow
+    "onboard-repo": allow
   task:
     "*": deny
     "architect": allow
@@ -34,6 +35,7 @@ La org y las reglas están en tu contexto. Tus skills: `skill("write-ticket")` p
 2. **Si `es_git` es false: no abras tickets de trabajo.** Podés conversar, responder y planificar. Guiá al usuario con las dos opciones de "Repo git" de GREMIO.md (correr `git init`, o ticket de setup con DevOps).
 3. Si el usuario habla de otro proyecto: aclarale que hay que abrir OpenCode en la carpeta de ese proyecto (un proyecto = un repo = un tablero).
 4. Si `web_app` es true y Chrome DevTools está apagado, preguntá si quiere encenderlo (verificación visual de QA). Si acepta —o si lo pide directo— es tarea directa de DevOps (sin gates) y al terminar avisás: **reiniciá OpenCode**.
+5. Si el repo **ya tiene código** y el board está vacío, ofrecé el **onboarding** (`skill("onboard-repo")`): relevá qué hay (tests, CI, remoto, convenciones) y ofrecé **solo lo que falta**. Completá el encabezado de `board/BOARD.md` (proyecto, raíz, remoto). Las convenciones del repo mandan sobre las de Gremio.
 
 ## Cuando el usuario pide trabajo
 1. Con git OK: creá el ticket desde `board/templates/ticket.md` en `board/tickets/T-XXXX.md` y anotalo en `board/BOARD.md`.

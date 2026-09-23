@@ -159,6 +159,7 @@ merge_json() {
       if(b.default_agent===undefined&&a.default_agent!==undefined)b.default_agent=a.default_agent;
       if(b.subagent_depth===undefined&&a.subagent_depth!==undefined)b.subagent_depth=a.subagent_depth;
       fs.writeFileSync(proj,JSON.stringify(b,null,2)+"\n");
+      if(b.default_agent&&b.default_agent!=="lead"){process.stderr.write("  aviso: el proyecto define default_agent="+b.default_agent+". Para trabajar con el Gremio, cambiá a Lead (Tab) o poné default_agent: lead.\n");}
     ' "$pkg" "$proj"
     ok "opencode.json mergeado"
   elif [ "$tool" = "python3" ]; then
@@ -174,6 +175,9 @@ b["permission"]=perm
 if "default_agent" not in b and a.get("default_agent") is not None: b["default_agent"]=a["default_agent"]
 if "subagent_depth" not in b and a.get("subagent_depth") is not None: b["subagent_depth"]=a["subagent_depth"]
 json.dump(b,open(proj,"w"),indent=2,ensure_ascii=False); open(proj,"a").write("\n")
+import sys
+da=b.get("default_agent")
+if da and da!="lead": sys.stderr.write("  aviso: el proyecto define default_agent="+str(da)+". Para trabajar con el Gremio, cambiá a Lead (Tab) o poné default_agent: lead.\n")
 ' "$pkg" "$proj"
     ok "opencode.json mergeado"
   else

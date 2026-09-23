@@ -39,13 +39,14 @@ Gremio trabaja **con git** (historial, ramas, PRs, rollback). El Lead **puede co
 
 El **remoto no es obligatorio**: hace falta para PR y deploy. Sin remoto se trabaja con rama + commits locales. Crear repos, pushear o mergear PR **siempre** requiere tu aprobación; repo nuevo por defecto **privado**.
 
-## Puesta en marcha de un proyecto
+## Puesta en marcha y adopción
 
-Si al proyecto le falta base, el Lead ofrece tres pasos, cada uno como ticket:
-
+**Repo nuevo:** el Lead ofrece los pasos que falten, cada uno como ticket:
 1. **`project-setup`** (DevOps) — git init, remoto opcional, primer commit.
 2. **`test-setup`** (Dev) — runner de tests, primer test real y comando único.
-3. **`ci-setup`** (DevOps) — CI en GitHub con tests en cada push/PR, más **branch protection** (el PR no mergea sin CI verde ni aprobación).
+3. **`ci-setup`** (DevOps) — CI en GitHub (tests en cada push/PR) + **branch protection** (el PR no mergea sin CI verde ni aprobación).
+
+**Repo existente:** Gremio **no impone** su forma. El Lead releva qué ya hay (tests, CI, remoto, README, licencia), lee las reglas del proyecto y ofrece **solo lo que falta**. Las convenciones del repo mandan.
 
 El modelo de rama (simple o GitFlow) se elige en `git-workflow`.
 
@@ -124,3 +125,7 @@ gremio/
 - Gremio es agnóstico de stack: las particularidades van en skills.
 - Los MCPs pesados vienen **apagados** (no denegados): no arrancan ni consumen hasta que los encendés. Chrome DevTools y Playwright quedan además reservados a QA.
 - Si tenés un `AGENTS.md` global en `~/` de otro ecosistema, OpenCode lo sigue inyectando: revisalo para no pagar tokens de reglas que no usás.
+
+## Licencia
+
+MIT — ver [LICENSE](LICENSE).

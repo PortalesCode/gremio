@@ -2,15 +2,15 @@
  * gremio-estado.ts — Estado del proyecto para el Gremio (read-only, sin shell).
  *
  * Expone UNA tool: `gremio_estado`.
- * Devuelve: raíz, si es repo git, rama, remoto, si hay commits, el tablero,
- * si el proyecto es una web app (señales + stack), y el estado de las
- * herramientas pesadas definidas en el `opencode.json` del proyecto.
+ * Devuelve: raíz, repo git (rama, remoto, commits), tablero, si es web app,
+ * qué herramientas pesadas están encendidas, y qué base ya tiene el proyecto
+ * (tests, CI, README, CONTRIBUTING, licencia).
  *
- * No ejecuta comandos: lee `.git/`, `package.json`, marcadores de web y
- * `opencode.json`. Nunca lanza: ante cualquier error devuelve lo disponible.
+ * No ejecuta comandos: lee `.git/`, `package.json`, marcadores, `opencode.json`
+ * y presencia de archivos/carpetas. Nunca lanza: ante error devuelve lo disponible.
  *
- * Uso: al arrancar cada sesión, para que el Lead sepa dónde está, si puede
- * abrir tickets (sin git, no) y si conviene ofrecer encender Chrome DevTools.
+ * Uso: al arrancar cada sesión. Permite al Lead saber dónde está, si puede abrir
+ * tickets (sin git, no) y qué puesta en marcha ofrecer sin duplicar lo existente.
  */
 
 import { existsSync, readFileSync, readdirSync } from "fs";
@@ -44,6 +44,15 @@ const MARCADORES_WEB = [
   "src/App.svelte",
   "app/page.tsx",
   "pages/index.tsx",
+];
+
+const PATRONES_TEST = [
+  /^test_.*\.py$/,
+  /.*_test\.py$/,
+  /.*\.test\.[jt]sx?$/,
+  /.*\.spec\.[jt]sx?$/,
+  /.*_test\.go$/,
+  /.*_spec\.rb$/,
 ];
 
 function leerRama(gitDir: string): string | null {
@@ -127,12 +136,31 @@ function leerHerramientas(raiz: string): Record<string, boolean> | null {
   }
 }
 
+function tieneTests(raiz: string): boolean {
+  const dirs = ["tests", "test", "spec", "__tests__", "src/tests", "src/__tests__"];
+  if (dirs.some((d) => existsSync(join(raiz, d)))) return true;
+  try {
+    return readdirSync(raiz).some((f) => PATRONES_TEST.some((p) => p.test(f)));
+  } catch {
+    return false;
+  }
+}
+
+function tieneCI(raiz: string): boolean {
+  try {
+    const d = join(raiz, ".github", "workflows");
+    return existsSync(d) && readdirSync(d).some((f) => /\.ya?ml$/.test(f));
+  } catch {
+    return false;
+  }
+}
+
 export default (async ({ directory }) => {
   return {
     tool: {
       gremio_estado: tool({
         description:
-          "Estado del proyecto para el Gremio: raíz, repo git (rama, remoto, commits), tablero, si es web app (stack/señales) y qué herramientas pesadas están encendidas. Read-only, sin shell. Llamala al arrancar cada sesión.",
+          "Estado del proyecto para el Gremio: raíz, repo git (rama, remoto, commits), tablero, web app, herramientas encendidas y base del proyecto (tests, CI, README, CONTRIBUTING, licencia). Read-only, sin shell. Llamala al arrancar cada sesión.",
         args: {},
         async execute(_args, context) {
           const raiz = context.directory || directory;
@@ -156,6 +184,14 @@ export default (async ({ directory }) => {
           const herramientas = leerHerramientas(raiz);
           const devtoolsOn = herramientas?.["chrome-devtools"] === true;
 
+          const base = {
+            tests: tieneTests(raiz),
+            ci: tieneCI(raiz),
+            readme: existsSync(join(raiz, "README.md")),
+            contributing: existsSync(join(raiz, "CONTRIBUTING.md")),
+            licencia: existsSync(join(raiz, "LICENSE")) || existsSync(join(raiz, "LICENSE.md")),
+          };
+
           const avisos: string[] = [];
           if (!esGit) {
             avisos.push(
@@ -164,14 +200,21 @@ export default (async ({ directory }) => {
             );
           } else if (!commits) {
             avisos.push("Repo git sin commits: el primer commit corresponde al ticket de setup (DevOps).");
-          } else if (!remoto) {
-            avisos.push("Repo git sin remoto: se trabaja local (rama + commits). El remoto solo hace falta para PR/deploy.");
           }
           if (web.es && !devtoolsOn) {
             avisos.push(
               "Es una web app y Chrome DevTools está apagado: preguntale al usuario si quiere encenderlo " +
                 "para verificación visual (QA). Si acepta, es tarea directa de DevOps; recordá al final: reiniciar OpenCode."
             );
+          }
+          if (esGit && commits && !base.tests) {
+            avisos.push("No hay tests: ofrecé el ticket de test-setup (Dev).");
+          }
+          if (esGit && commits && !base.ci) {
+            avisos.push("No hay CI: ofrecé el ticket de ci-setup (DevOps) si hay remoto.");
+          }
+          if (esGit && commits && !remoto) {
+            avisos.push("Sin remoto: se trabaja local (rama + commits). El remoto solo hace falta para PR/CI/deploy.");
           }
 
           return JSON.stringify(
@@ -187,6 +230,7 @@ export default (async ({ directory }) => {
               web_stack: web.stack,
               web_senales: web.senales,
               herramientas,
+              base,
               aviso: avisos.length > 0 ? avisos.join(" ") : null,
             },
             null,
